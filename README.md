@@ -33,6 +33,11 @@ pip install -r requirements.txt
 > - Layer normalization is performed at the end of both the encoder and decoder stacks.
 > - There is no softmax layer as it is already used by the CrossEntropy loss function implemented in PyTorch.
 
+Hereafter a comparison between the original transformer and the one from this repository.
+Original             | This repository
+:-------------------------:|:-------------------------:
+![Original Transformer architecture](https://github.com/RistoAle97/yati/blob/main/assets/transformer_original.jpg) | ![The Transformer architecture as implemented in this repository](https://github.com/RistoAle97/yati/blob/main/assets/model_architecture.jpg)
+
 ---
 
 ## :books: Bibliography
