@@ -1,6 +1,12 @@
-import torch
-import yati
+from yati import SMALL_CONFIG, BASE_CONFIG, LARGE_CONFIG, Transformer, model_n_parameters
+
 
 if __name__ == "__main__":
-    rand_tensor = torch.randint(0, 10, (5, 5))
-    print("Niko")
+    model_small = Transformer(SMALL_CONFIG)
+    print(model_n_parameters(model_small))
+
+    model_base = Transformer(BASE_CONFIG)
+    print(model_n_parameters(model_base))
+
+    model_large = Transformer(LARGE_CONFIG)
+    print(model_n_parameters(model_large))

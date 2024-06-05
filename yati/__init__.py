@@ -1,4 +1,5 @@
 from .config import TransformerConfig, SMALL_CONFIG, BASE_CONFIG, LARGE_CONFIG
+from .generation import beam_decoding, greedy_decoding
 from .layers import (
     FeedForward,
     MultiHeadAttention,
@@ -13,10 +14,15 @@ from .transformer import Transformer
 from .utils import init_bert_weights, model_n_parameters, model_size
 
 __all__ = [
+    "SMALL_CONFIG",
+    "BASE_CONFIG",
+    "LARGE_CONFIG",
+    "beam_decoding",
     "create_decoder_mask",
     "create_encoder_mask",
     "create_masks",
     "generate_causal_mask",
+    "greedy_decoding",
     "init_bert_weights",
     "model_n_parameters",
     "model_size",

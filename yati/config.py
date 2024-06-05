@@ -61,6 +61,7 @@ class TransformerConfig:
         self.label_smoothing = label_smoothing
 
 
-SMALL_CONFIG = TransformerConfig(32000, d_model=256)  # 28m parameters
-BASE_CONFIG = TransformerConfig(32000)  # 65m parameters
-LARGE_CONFIG = TransformerConfig(32000, d_model=1024, n_heads=16, dropout=0.3)  # 213m parameters
+# Some predefined configurations
+SMALL_CONFIG = TransformerConfig(32000, d_model=256)  # 25.5m parameters
+BASE_CONFIG = TransformerConfig(32000)  # 60.5m parameters
+LARGE_CONFIG = TransformerConfig(32000, d_model=1024, n_heads=16, dim_ff=4096, dropout=0.3)  # 209m parameters
