@@ -70,7 +70,8 @@ class Transformer(nn.Module):
 
         # Linear output
         self.linear_output = nn.Linear(self.d_model, self.vocab_size, bias=False)
-        if config.tie_embeddings:
+        self.tie_embeddings = config.tie_embeddings
+        if self.tie_embeddings:
             self.linear_output.weight = self.embedding.weight
 
         # Label smoothing value
