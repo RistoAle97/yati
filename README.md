@@ -36,7 +36,7 @@ pip install -r requirements.txt
 Hereafter a comparison between the original transformer and the one from this repository.
 Original             | This repository
 :-------------------------:|:-------------------------:
-![Original Transformer architecture](https://github.com/RistoAle97/yati/blob/main/assets/transformer_original.jpg) | ![The Transformer architecture as implemented in this repository](https://github.com/RistoAle97/yati/blob/main/assets/model_architecture.jpg)
+<img src="https://github.com/RistoAle97/yati/blob/main/assets/transformer_original.jpg" width=80%> | <img src="https://github.com/RistoAle97/yati/blob/main/assets/model_architecture.jpg" width=78%/>
 
 ---
 
