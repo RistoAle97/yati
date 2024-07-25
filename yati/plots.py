@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from numerize.numerize import numerize
 
 from yati.transformer import Transformer
 from yati.utils import model_n_parameters
@@ -23,7 +24,6 @@ def plot_model_parameters(model: Transformer, only_trainable: bool = False) -> N
 
     # Compute the total number of parameters
     model_parameters = sum(values)
-    from numerize.numerize import numerize
     labels = [label + f"\n{numerize(value)}" for label, value in zip(labels, values)]
 
     # Build the plot

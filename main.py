@@ -1,5 +1,6 @@
-from yati import SMALL_CONFIG, BASE_CONFIG, LARGE_CONFIG, Transformer, model_n_parameters
+from yati import BASE_CONFIG, LARGE_CONFIG, SMALL_CONFIG, Transformer, model_n_parameters
 from yati.plots import plot_model_parameters
+
 
 if __name__ == "__main__":
     model_small = Transformer(SMALL_CONFIG)

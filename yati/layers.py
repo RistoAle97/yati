@@ -6,7 +6,6 @@ from torch.functional import F
 
 
 class MultiHeadAttention(nn.Module):
-
     def __init__(self, d_model: int = 512, n_heads: int = 8, dropout: float = 0.0) -> None:
         """
         The multi-head attention sub-layer from "Attention is all you need" (https://arxiv.org/pdf/1706.03762.pdf).
@@ -36,7 +35,7 @@ class MultiHeadAttention(nn.Module):
         query: torch.Tensor,
         key: torch.Tensor,
         value: torch.Tensor,
-        mask: torch.Tensor = None,
+        mask: torch.Tensor | None = None,
     ) -> torch.Tensor:
         attn_scores = torch.matmul(query, key.transpose(-2, -1))
         attn_scores /= self.d_model**0.5
@@ -51,7 +50,7 @@ class MultiHeadAttention(nn.Module):
         return torch.matmul(p_attn, value)  # (bsz, n_heads, seq_len, d_model)
 
     def forward(
-        self, query: torch.Tensor, key: torch.Tensor, value: torch.Tensor, mask: torch.Tensor = None
+        self, query: torch.Tensor, key: torch.Tensor, value: torch.Tensor, mask: torch.Tensor | None = None
     ) -> torch.Tensor:
         # Get the batch size
         bsz = query.size(0)
@@ -76,7 +75,6 @@ class MultiHeadAttention(nn.Module):
 
 
 class FeedForward(nn.Module):
-
     def __init__(self, d_model: int = 512, dim_ff: int = 2048, dropout: float = 0.0, activation: str = "relu") -> None:
         """
         The feed-forward sub-layer from "Attention is all you need" (https://arxiv.org/pdf/1706.03762.pdf).
@@ -90,9 +88,7 @@ class FeedForward(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.linear2 = nn.Linear(dim_ff, d_model)
         if activation not in ["relu", "gelu"]:
-            raise ValueError(
-                "The activation function of the feed-forward sub-layer must be either \"relu\" or \"gelu\"."
-            )
+            raise ValueError('The activation function of the feed-forward sub-layer must be either "relu" or "gelu".')
 
         self.activation = F.relu if activation == "relu" else F.gelu
 
@@ -104,7 +100,6 @@ class FeedForward(nn.Module):
 
 
 class TransformerEncoderLayer(nn.Module):
-
     def __init__(
         self,
         d_model: int = 512,
@@ -141,7 +136,7 @@ class TransformerEncoderLayer(nn.Module):
         self.ff = FeedForward(d_model, dim_ff, dropout_ff, activation_ff)
         self.ff_dropout = nn.Dropout(dropout)
 
-    def forward(self, src_embeddings: torch.Tensor, e_mask: torch.Tensor = None) -> torch.Tensor:
+    def forward(self, src_embeddings: torch.Tensor, e_mask: torch.Tensor | None = None) -> torch.Tensor:
         # Multi-head attention sub-layer
         mha_out = self.mha_norm(src_embeddings)
         mha_out = self.mha(mha_out, mha_out, mha_out, e_mask)
@@ -155,7 +150,7 @@ class TransformerEncoderLayer(nn.Module):
 
 
 class TransformerEncoder(nn.Module):
-    def __init__(self, e_layer: TransformerEncoderLayer, num_layers: int = 6, norm: nn.LayerNorm = None) -> None:
+    def __init__(self, e_layer: TransformerEncoderLayer, num_layers: int = 6, norm: nn.LayerNorm | None = None) -> None:
         """
         The encoder from "Attention is all you need" (https://arxiv.org/pdf/1706.03762.pdf). Following the actual
         implementation of the paper, a LayerNorm layer is put at the end of the encoder layers stack.
@@ -226,8 +221,8 @@ class TransformerDecoderLayer(nn.Module):
         self,
         tgt_embeddings: torch.Tensor,
         e_output: torch.Tensor,
-        d_mask: torch.Tensor = None,
-        e_mask: torch.Tensor = None,
+        d_mask: torch.Tensor | None = None,
+        e_mask: torch.Tensor | None = None,
     ) -> torch.Tensor:
         # Multi-head attention sub-layer
         mha_out = self.mha_norm(tgt_embeddings)
@@ -247,7 +242,7 @@ class TransformerDecoderLayer(nn.Module):
 
 
 class TransformerDecoder(nn.Module):
-    def __init__(self, d_layer: TransformerDecoderLayer, num_layers: int = 6, norm: nn.LayerNorm = None):
+    def __init__(self, d_layer: TransformerDecoderLayer, num_layers: int = 6, norm: nn.LayerNorm | None = None):
         """
         The decoder from "Attention is all you need" (https://arxiv.org/pdf/1706.03762.pdf). Following the actual
         implementation of the paper, a LayerNorm layer is put at the end of the decoder layers stack.

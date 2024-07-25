@@ -1,5 +1,4 @@
 class TransformerConfig:
-
     def __init__(
         self,
         vocab_size: int,

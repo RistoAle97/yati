@@ -4,13 +4,12 @@ from torch.functional import F
 
 import yati.generation as inference
 from yati.config import TransformerConfig
-from yati.layers import TransformerDecoder, TransformerEncoder, TransformerDecoderLayer, TransformerEncoderLayer
+from yati.layers import TransformerDecoder, TransformerDecoderLayer, TransformerEncoder, TransformerEncoderLayer
 from yati.positional_encoding import PositionalEncoding
 from yati.utils import init_bert_weights
 
 
 class Transformer(nn.Module):
-
     def __init__(self, config: TransformerConfig) -> None:
         """
         The Transformer model from "Attention is all you need" (https://arxiv.org/pdf/1706.03762.pdf).

@@ -1,8 +1,8 @@
 import torch
 from torch.functional import F
 
+from yati.masks import create_decoder_mask, create_encoder_mask
 from yati.transformer import Transformer
-from yati.masks import create_encoder_mask, create_decoder_mask
 
 
 def greedy_decoding(
@@ -220,7 +220,7 @@ class BeamHypotheses:
         self,
         num_beams: int,
         length_penalty: float = 1.0,
-        max_length: int = None,
+        max_length: int | None = None,
         early_stopping: bool = False,
     ) -> None:
         """
