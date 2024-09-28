@@ -20,7 +20,8 @@ git clone https://github.com/RistoAle97/yati
 ```
 Then, install the dependencies.
 ```bash
-pip install -r requirements.txt
+pip install -e yati
+pip install yati[dev]  # if you want to contribute
 ```
 ---
 

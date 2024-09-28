@@ -1,11 +1,35 @@
-import matplotlib.pyplot as plt
-from numerize.numerize import numerize
+"""Utils for plotting a graph about the distribution of parameters inside a transformer model."""
 
-from yati.transformer import Transformer
-from yati.utils import model_n_parameters
+import matplotlib.pyplot as plt
+
+from src.yati.transformer import Transformer
+from src.yati.utils import model_n_parameters
+
+
+def _numerize(n: int, ndigits: int = 2) -> str:
+    if n < 0:
+        raise ValueError("The value must be positive")
+
+    conversion_tuples = [(1e0, ""), (1e3, "K"), (1e6, "M"), (1e9, "B"), (1e12, "T")]
+    for i, conv_tuple in enumerate(conversion_tuples):
+        key, value = conv_tuple
+        if n >= key:
+            continue
+        else:
+            prev_key, prev_value = conversion_tuples[i - 1]
+            return str(round(n / prev_key, ndigits)) + prev_value
+
+    last_key, last_value = conversion_tuples[-1]
+    return str(round(n / last_key, ndigits)) + last_value
 
 
 def plot_model_parameters(model: Transformer, only_trainable: bool = False) -> None:
+    """Plots the distribution of the model's parameters.
+
+    Args:
+        model: the model whose parameters should be plotted.
+        only_trainable: whether to consider only the trainable parameters.
+    """
     # Compute the number of parameters for each module
     idx_to_consider = 1 if only_trainable else 0
     embeddings_parameters = model_n_parameters(model.embedding)[idx_to_consider]
@@ -24,7 +48,7 @@ def plot_model_parameters(model: Transformer, only_trainable: bool = False) -> N
 
     # Compute the total number of parameters
     model_parameters = sum(values)
-    labels = [label + f"\n{numerize(value)}" for label, value in zip(labels, values)]
+    labels = [label + f"\n{_numerize(value)}" for label, value in zip(labels, values)]
 
     # Build the plot
     fig, ax = plt.subplots(figsize=(7, 5))
@@ -38,5 +62,5 @@ def plot_model_parameters(model: Transformer, only_trainable: bool = False) -> N
     )
     plt.setp(labels_plot, **{"weight": "bold", "fontsize": 15.5})
     plt.setp(autopcts, **{"color": "white", "weight": "bold", "fontsize": 14.5})
-    plt.title(f"Model parameters ({numerize(model_parameters)}) distribution", fontsize=18, weight="bold", pad=15)
+    plt.title(f"Model parameters ({_numerize(model_parameters)}) distribution", fontsize=18, weight="bold", pad=15)
     fig.show()

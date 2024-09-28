@@ -1,19 +1,24 @@
+"""Class for the transformer model."""
+
 import torch
 from torch import nn
 from torch.functional import F
 
-import yati.generation as inference
-from yati.config import TransformerConfig
-from yati.layers import TransformerDecoder, TransformerDecoderLayer, TransformerEncoder, TransformerEncoderLayer
-from yati.positional_encoding import PositionalEncoding
-from yati.utils import init_bert_weights
+from src import yati as inference
+from src.yati.config import TransformerConfig
+from src.yati.layers import TransformerDecoder, TransformerDecoderLayer, TransformerEncoder, TransformerEncoderLayer
+from src.yati.positional_encoding import PositionalEncoding
+from src.yati.utils import init_bert_weights
 
 
 class Transformer(nn.Module):
+    """The Transformer model from "Attention is all you need" (https://arxiv.org/pdf/1706.03762.pdf)."""
+
     def __init__(self, config: TransformerConfig) -> None:
-        """
-        The Transformer model from "Attention is all you need" (https://arxiv.org/pdf/1706.03762.pdf).
-        :param config: a TransformerConfig object.
+        """Initializes a Transformer object.
+
+        Args:
+            config: a TransformerConfig object.
         """
         super().__init__()
         # Parameters
@@ -80,11 +85,14 @@ class Transformer(nn.Module):
         self.apply(init_bert_weights)
 
     def encode(self, e_input: torch.Tensor, e_mask: torch.Tensor = None) -> torch.Tensor:
-        """
-        Encodes the masked source sentence.
-        :param e_input: torch tensor of shape (bsz, seq_len).
-        :param e_mask: mask for the encoder of shape (bsz, 1, seq_len).
-        :return: torch tensor representing the encodings with shape (bsz, seq_len, d_model).
+        """Encodes the masked source sentence.
+
+        Args:
+            e_input: torch tensor of shape (bsz, seq_len).
+            e_mask: mask for the encoder of shape (bsz, 1, seq_len).
+
+        Returns:
+            a tensor representing the encodings with shape (bsz, seq_len, d_model).
         """
         src_embeddings = self.embedding(e_input)  # (bsz, seq_len, d_model)
         src_embeddings = self.positional_encoder(src_embeddings * self.embedding_scale)
@@ -98,13 +106,16 @@ class Transformer(nn.Module):
         d_mask: torch.Tensor = None,
         e_mask: torch.Tensor = None,
     ) -> torch.Tensor:
-        """
-        Decodes the masked target sentence given the encodings of the source sentence.
-        :param e_output: encodings coming from the encoder of shape (bsz, seq_len, d_model).
-        :param tgt_input: torch tensor of shape (bsz, seq_len)
-        :param e_mask: mask for the encoder of shape (bsz, 1, seq_len).
-        :param d_mask: mask for the decoder of shape (bsz, seq_len, seq_len).
-        :return: torch tensor representing the decodings with shape (bsz, seq_len, vocab_size).
+        """Decodes the masked target sentence given the encodings of the source sentence.
+
+        Args:
+            e_output: encodings coming from the encoder of shape (bsz, seq_len, d_model).
+            tgt_input: torch tensor of shape (bsz, seq_len)
+            e_mask: mask for the encoder of shape (bsz, 1, seq_len).
+            d_mask: mask for the decoder of shape (bsz, seq_len, seq_len).
+
+        Returns:
+            a tensor representing the decodings with shape (bsz, seq_len, vocab_size).
         """
         tgt_embeddings = self.embedding(tgt_input)  # (bsz, seq_len, d_model)
         tgt_embeddings = self.positional_encoder(tgt_embeddings * self.embedding_scale)
@@ -118,8 +129,16 @@ class Transformer(nn.Module):
         e_mask: torch.Tensor = None,
         d_mask: torch.Tensor = None,
     ) -> torch.Tensor:
-        """
-        Process masked source and target sequences.
+        """Process masked source and target sequences.
+
+        Args:
+            src_input: tensor of shape (bsz, seq_len).
+            tgt_input: tensor of shape (bsz, seq_len).
+            e_mask: mask for the encoder of shape (bsz, 1, seq_len).
+            d_mask: mask for the decoder of shape (bsz, seq_len, seq_len).
+
+        Returns:
+            a tensor of shape (bsz, seq_len, vocab_size).
         """
         # Embeddings and positional encoding
         src_embeddings = self.embedding(src_input)  # (bsz, seq_len, d_model)
@@ -136,6 +155,15 @@ class Transformer(nn.Module):
         return out
 
     def compute_loss(self, logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
+        """Computes the loss for a batch of logits.
+
+        Args:
+            logits: logits obtained by calling the model forward method, their shape is (bsz, seq_len, vocab_size).
+            labels: the ground truths of shape (bsz, seq_len).
+
+        Returns:
+            a tensor that represents the cross entropy loss for the given batch of logits.
+        """
         logits = logits.contiguous().view(-1, logits.size(-1))
         labels = labels.contiguous().view(-1)
         loss = F.cross_entropy(logits, labels, ignore_index=self.pad_token_id, label_smoothing=self.label_smoothing)
@@ -148,16 +176,19 @@ class Transformer(nn.Module):
         max_new_tokens: int = 10,
         num_beams: int = 5,
     ) -> torch.Tensor:
-        """
-        Generate tokens at inference time using greedy or beam search decoding.
-        :param input_ids: tokenized source sentence.
-        :param decoder_start_token_id: the token that will prepend the output sequence, in a multilingual setting this
-            should be the target language token, in a bilingual setting the beginning of sequence token should be
-            used instead.
-        :param max_new_tokens: the number of new tokens allowed on top of the source sentence length (default=10).
-        :param num_beams: size of the beam, if it is equal to 1 than greedy decoding will be applied, otherwise
-            beam search will be performed (default=5).
-        :return: tokenized translation of the source sentence.
+        """Generate tokens at inference time using greedy or beam search decoding.
+
+        Args:
+            input_ids: tokenized source sentence.
+            decoder_start_token_id: the token that will prepend the output sequence, in a multilingual setting this
+                should be the target language token, in a bilingual setting the beginning of sequence token should be
+                used instead.
+            max_new_tokens: the number of new tokens allowed on top of the source sentence length (default=10).
+            num_beams: size of the beam, if it is equal to 1 than greedy decoding will be applied, otherwise
+                beam search will be performed (default=5).
+
+        Returns:
+            the tokenized translation of the source sentence.
         """
         if num_beams < 1:
             raise ValueError("The beam size must be at least 1.")

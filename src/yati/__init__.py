@@ -1,3 +1,5 @@
+"""Yet Another Transformer Implementation."""
+
 from .config import BASE_CONFIG, LARGE_CONFIG, SMALL_CONFIG, TransformerConfig
 from .generation import beam_decoding, greedy_decoding
 from .layers import (

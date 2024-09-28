@@ -1,14 +1,18 @@
+"""Utilities for the transformer model."""
+
 from torch import nn
 
 
 def init_bert_weights(module: nn.Module) -> None:
-    """
-    Initialize module's weights following BERT https://arxiv.org/pdf/1810.04805.pdf. This method should be called by
-    using self.apply(init_bert_weights) inside the module class. The weights of the nn.Linear and nn.Embedding layers
-    are sampled by a normal distribution with mean 0.0 and std 0.02, while the weights of nn.LayerNorm layer are set
-    to 1.0. The bias of the nn.Linear, nn.LayerNorm layers and the weights related to the padding token inside the
-    nn.Embedding are then set to 0.
-    :param module: the pytorch nn.Module to initialize.
+    """Initialize module's weights following BERT https://arxiv.org/pdf/1810.04805.pdf.
+
+    This method should be called by using self.apply(init_bert_weights) inside the module class. The weights of the
+    nn.Linear and nn.Embedding layers are sampled by a normal distribution with mean 0.0 and std 0.02, while the weights
+    of nn.LayerNorm layer are set to 1.0. The bias of the nn.Linear, nn.LayerNorm layers and the weights related to the
+    padding token inside the nn.Embedding are then set to 0.
+
+    Args:
+        module: the pytorch nn.Module to initialize.
     """
     if isinstance(module, nn.Linear):
         module.weight.data.normal_(mean=0.0, std=0.02)
@@ -24,9 +28,13 @@ def init_bert_weights(module: nn.Module) -> None:
 
 
 def model_n_parameters(model: nn.Module) -> tuple[int, int]:
-    """
-    Computes the number of parameters, and the trainable ones, of a pytorch model.
-    :param: model: a pytorch nn.Module.
+    """Computes the number of parameters, and the trainable ones, of a pytorch model.
+
+    Args:
+        model: a pytorch nn.Module.
+
+    Returns:
+        a tuple with the number of parameters and the trainable ones.
     """
     trainable_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
     model_parameters = sum(p.numel() for p in model.parameters())
@@ -34,11 +42,14 @@ def model_n_parameters(model: nn.Module) -> tuple[int, int]:
 
 
 def model_size(model: nn.Module, size: str = "mb") -> float:
-    """
-    Computes the size of a pytorch model in terms of kb, mb or gb.
-    :param model: a pytorch nn.Module.
-    :param size: string which defines the wanted size to compute.
-    :return: the size of the model.
+    """Computes the size of a pytorch model in terms of occupied disk space.
+
+    Args:
+        model: a pytorch nn.Module.
+        size: string which defines the wanted size to compute.
+
+    Returns:
+        the size of the model in terms of kb, mb or gb.
     """
     allowed_sizes = {"kb": 1, "mb": 2, "gb": 3}
 

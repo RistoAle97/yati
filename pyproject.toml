@@ -1,12 +1,40 @@
-[tool.black]
-line-length = 120
-target-version = ["py310", "py311", "py312"]
-skip-string-normalization = true
-diff = true
-color = true
+[build-system]
+requires = ["setuptools>=65.5.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "yati"
+authors = [
+    {name = "Alessandro Ristori", email = "aleristori97@gmail.com"}
+]
+version = "1.0.0"
+description = "Yet Another Transformer Implementation"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3 :: Only",
+]
+dependencies = [
+    "matplotlib>=3.8.4",
+    "torch>=2.3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pre-commit>=3.7.1",
+    "ruff>=0.6.5",
+    "typos>=1.24.5",
+]
+
+[project.urls]
+Repository = "https://github.com/RistoAle97/yati"
 
 [tool.ruff]
-extend-include = ["*.ipynb"]
+extend-exclude = ["main.py"]
 line-length = 120
 output-format = "grouped"
 target-version = "py310"
@@ -20,6 +48,7 @@ ignore = [
 ]
 select = [
     "ARG", # Flake8 unused arguments
+    "D", # Pydocstyle errors
     "E", # PEP8 errors
     "F", # PEP8 formatting
     "I", # Import sorting
@@ -27,6 +56,9 @@ select = [
     "RUF", # Ruff specific rules
     "UP", # Pyupgrade upgrades
 ]
+
+[tool.ruff.lint.extend-per-file-ignores]
+"main.py" = ["D"]
 
 [tool.ruff.lint.isort]
 force-single-line = false
@@ -37,3 +69,6 @@ convention = "google"
 
 [tool.ruff.format]
 docstring-code-format = true
+
+[tool.uv.pip]
+extra-index-url = ["https://download.pytorch.org/whl/cu124"]

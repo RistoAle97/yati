@@ -1,8 +1,10 @@
+"""Generation methods."""
+
 import torch
 from torch.functional import F
 
-from yati.masks import create_decoder_mask, create_encoder_mask
-from yati.transformer import Transformer
+from src.yati.masks import create_decoder_mask, create_encoder_mask
+from src.yati.transformer import Transformer
 
 
 def greedy_decoding(
@@ -11,15 +13,20 @@ def greedy_decoding(
     decoder_start_token_id: int,
     max_new_tokens: int = 10,
 ) -> torch.Tensor:
-    """
+    """Greedy decoding algorithm.
+
     Performs greedy search for translating tokenized input sentence, this should be used only by autoregressive
-    transformers. This method is heavily inspired by the greedy_search method from Huggingface.
-    :param model: the autoregressive model.
-    :param input_ids: the tokenized input sentence of shape (bsz, seq_len).
-    :param decoder_start_token_id: the decoder start token id, for multilingual models this should be the target
-        language code id.
-    :param max_new_tokens: maximum allowed new tokens (default=10).
-    :return: the tokenized translated sentence.
+    transformers. This method is heavily inspired by the ``greedy_search`` method from Huggingface.
+
+    Args:
+        model: the Transformer model.
+        input_ids: the tokenized input sentence of shape (bsz, seq_len).
+        decoder_start_token_id: the decoder start token id, for multilingual NMT models this should be the target
+            language code id.
+        max_new_tokens: maximum allowed new tokens (default=10).
+
+    Returns:
+        the tokenized translated sentence.
     """
     assert max_new_tokens >= 0
 
@@ -70,17 +77,22 @@ def beam_decoding(
     num_beams: int = 5,
     beams_to_keep: int = 1,
 ) -> torch.Tensor:
-    """
-    Performs beams search for translating tokenized input sentence, this should be used only by autoregressive
+    """Beam search decoding algorithm.
+
+    Performs beam search for translating tokenized input sentence, this should be used only by autoregressive
     transformers. This method is heavily inspired by the beam_search method from Huggingface.
-    :param model: the autoregressive model.
-    :param input_ids: the tokenized input sentence of shape (bsz, seq_len).
-    :param decoder_start_token_id: the decoder start token id, for multilingual models this should be the target
-        language code id.
-    :param max_new_tokens: maximum allowed new tokens (default=10).
-    :param num_beams: number of beams (default=5).
-    :param beams_to_keep: number of beams that will be returned upon calling the method (default=1).
-    :return: the tokenized translated sentence.
+
+    Args:
+        model: the Transformer model.
+        input_ids: the tokenized input sentence of shape (bsz, seq_len).
+        decoder_start_token_id: the decoder start token id, for multilingual NMT models this should be the target
+            language code id.
+        max_new_tokens: maximum allowed new tokens (default=10).
+        num_beams: number of beams (default=5).
+        beams_to_keep: number of beams that will be returned upon calling the method (default=1).
+
+    Returns:
+        the tokenized translated sentence.
     """
     assert max_new_tokens >= 0
     assert num_beams > 0
@@ -216,6 +228,8 @@ def beam_decoding(
 
 
 class BeamHypotheses:
+    """Beam hypotheses for a single sentence, see the implementation from Huggingface for a better understanding."""
+
     def __init__(
         self,
         num_beams: int,
@@ -223,14 +237,15 @@ class BeamHypotheses:
         max_length: int | None = None,
         early_stopping: bool = False,
     ) -> None:
-        """
-        Beam hypotheses for a single sentence, see the implementation from Huggingface for a better understanding.
-        :param num_beams: the number of beams.
-        :param length_penalty: the length penalty, values > 1.0 favor longer sentences, while values < 1.0 favor
-            shorter ones (default=1.0).
-        :param max_length: the maximum allowed length (default=None).
-        :param early_stopping: stop as soon as the number of finished hypotheses is equal to the number of beams
-            (default=True).
+        """Initializes a BeamHypotheses object.
+
+        Args:
+            num_beams: the number of beams.
+            length_penalty: the length penalty, values > 1.0 favor longer sentences, while values < 1.0 favor
+                shorter ones (default=1.0).
+            max_length: the maximum allowed length (default=None).
+            early_stopping: stop as soon as the number of finished hypotheses is equal to the number of beams
+                (default=True).
         """
         self.num_beams = num_beams
         self.length_penalty = length_penalty
@@ -240,14 +255,15 @@ class BeamHypotheses:
         self.worst_score = 1e9
 
     def __len__(self) -> int:
+        """Returns the number of beams."""
         return len(self.beams)
 
     def add_hypothesis(self, hypothesis: torch.Tensor, sum_log_p: float) -> None:
-        """
-        Add a beam hypothesis to the beams' list.
-        :param hypothesis: a tensor of int that represents a full generated sequence.
-        :param sum_log_p: the sum of log probabilities related to the hypothesis.
-        :return:
+        """Add a beam hypothesis to the beams' list.
+
+        Args:
+            hypothesis: a tensor of int that represents a full generated sequence.
+            sum_log_p: the sum of log probabilities related to the hypothesis.
         """
         hyp_score = sum_log_p / (hypothesis.shape[-1] ** self.length_penalty)
         if len(self) < self.num_beams or hyp_score > self.worst_score:
@@ -260,12 +276,16 @@ class BeamHypotheses:
                 self.worst_score = min(hyp_score, self.worst_score)
 
     def is_finished(self, best_sum_log_p: float, cur_len: int) -> bool:
-        """
-        Checks if it is still possible to generate hypotheses better than the current worst one. If early_stopping is
-        True, then the BeamHypotheses terminates when all the num_beams beams have been generated.
-        :param best_sum_log_p: current best sum of log probabilities not in the hypotheses.
-        :param cur_len: the current length of the best hypothesis in terms of score.
-        :return: if the no more hypotheses should be generated or not.
+        """Checks if it is still possible to generate hypotheses better than the current worst one.
+
+        If early_stopping is True, then the BeamHypotheses terminates when all the num_beams beams have been generated.
+
+        Args:
+            best_sum_log_p: current best sum of log probabilities not in the hypotheses.
+            cur_len: the current length of the best hypothesis in terms of score.
+
+        Returns:
+            whether no more hypotheses should be generated.
         """
         if len(self) < self.num_beams:
             return False

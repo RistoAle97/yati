@@ -1,3 +1,5 @@
+"""Layers for the transformer architecture."""
+
 import copy
 
 import torch
@@ -6,12 +8,15 @@ from torch.functional import F
 
 
 class MultiHeadAttention(nn.Module):
+    """The multi-head attention sub-layer from "Attention is all you need" (https://arxiv.org/pdf/1706.03762.pdf)."""
+
     def __init__(self, d_model: int = 512, n_heads: int = 8, dropout: float = 0.0) -> None:
-        """
-        The multi-head attention sub-layer from "Attention is all you need" (https://arxiv.org/pdf/1706.03762.pdf).
-        :param d_model: the model's embedding dimension (default=512).
-        :param n_heads: the number of heads (default=8).
-        :param dropout: the dropout value (default= 0.0).
+        """Initializes a multi-head attention layer.
+
+        Args:
+            d_model: the model's embedding dimension (default=512).
+            n_heads: the number of heads (default=8).
+            dropout: the dropout value (default= 0.0).
         """
         super().__init__()
         assert d_model % n_heads == 0
@@ -52,6 +57,14 @@ class MultiHeadAttention(nn.Module):
     def forward(
         self, query: torch.Tensor, key: torch.Tensor, value: torch.Tensor, mask: torch.Tensor | None = None
     ) -> torch.Tensor:
+        """Process the query, key and value tensors.
+
+        Args:
+            query: the query tensor.
+            key: the key tensor.
+            value: the value tensor.
+            mask: the mask tensor.
+        """
         # Get the batch size
         bsz = query.size(0)
 
@@ -75,13 +88,16 @@ class MultiHeadAttention(nn.Module):
 
 
 class FeedForward(nn.Module):
+    """The feed-forward sub-layer from "Attention is all you need" (https://arxiv.org/pdf/1706.03762.pdf)."""
+
     def __init__(self, d_model: int = 512, dim_ff: int = 2048, dropout: float = 0.0, activation: str = "relu") -> None:
-        """
-        The feed-forward sub-layer from "Attention is all you need" (https://arxiv.org/pdf/1706.03762.pdf).
-        :param d_model: the model's embedding dimension (default=512).
-        :param dim_ff: size of the intermediate linear transformation (default=2048).
-        :param dropout: the dropout value (default=0.0).
-        :param activation: the activation function, can be either ReLU or GeLu (default="relu").
+        """Initializes a feed-forward layer.
+
+        Args:
+            d_model: the model's embedding dimension (default=512).
+            dim_ff: size of the intermediate linear transformation (default=2048).
+            dropout: the dropout value (default=0.0).
+            activation: the activation function, can be either ReLU or GeLu (default="relu").
         """
         super().__init__()
         self.linear1 = nn.Linear(d_model, dim_ff)
@@ -93,6 +109,14 @@ class FeedForward(nn.Module):
         self.activation = F.relu if activation == "relu" else F.gelu
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Process the input tensor.
+
+        Args:
+            x: the input tensor of shape (bsz, seq_len, d_model).
+
+        Returns:
+            a tensor which represents the layer's output.
+        """
         out = self.activation(self.linear1(x))  # (bsz, seq_len, dim_ff)
         out = self.dropout(out)
         out = self.linear2(out)  # (bsz, seq_len, d_model)
@@ -100,6 +124,12 @@ class FeedForward(nn.Module):
 
 
 class TransformerEncoderLayer(nn.Module):
+    """The transformer encoder layer from "Attention is all you need" (https://arxiv.org/pdf/1706.03762.pdf).
+
+    The layer is made up of one multi-head attention sub-layer followed by a feed-forward sub-layer. Differently from
+    the paper, this implementation uses pre-norm inside the residual connection.
+    """
+
     def __init__(
         self,
         d_model: int = 512,
@@ -111,19 +141,18 @@ class TransformerEncoderLayer(nn.Module):
         activation_ff: str = "relu",
         layer_norm_eps: float = 1e-6,
     ) -> None:
-        """
-        The transformer encoder layer from "Attention is all you need" (https://arxiv.org/pdf/1706.03762.pdf). The layer
-        is made up of one multi-head attention sub-layer followed by a feed-forward sub-layer. Differently from the
-        paper, this implementation uses pre-norm inside the residual connection.
-        :param d_model: the model's embedding dimension (default=512).
-        :param n_heads: the number of heads in the multi-attention mechanism (default=8).
-        :param dim_ff: dimension of the feedforward sub-layer (default=2048).
-        :param dropout: the dropout value used at the end of each sub-layer (default=0.1).
-        :param dropout_mha: the dropout value for the multi-head attention (default=0.0).
-        :param dropout_ff: the dropout value for the feed-forward sub-layer (default=0.0).
-        :param activation_ff: the activation function for the feed-forward sub-layer, can be either ReLU or GeLU
-            (default="relu").
-        :param layer_norm_eps: the eps value in the layer normalization (default=1e-6).
+        """Initializes a transformer encoder layer.
+
+        Args:
+            d_model: the model's embedding dimension (default=512).
+            n_heads: the number of heads in the multi-attention mechanism (default=8).
+            dim_ff: dimension of the feedforward sub-layer (default=2048).
+            dropout: the dropout value used at the end of each sub-layer (default=0.1).
+            dropout_mha: the dropout value for the multi-head attention (default=0.0).
+            dropout_ff: the dropout value for the feed-forward sub-layer (default=0.0).
+            activation_ff: the activation function for the feed-forward sub-layer, can be either ReLU or GeLU
+                (default="relu").
+            layer_norm_eps: the eps value in the layer normalization (default=1e-6).
         """
         super().__init__()
         # Multi-head attention sub-layer
@@ -137,6 +166,15 @@ class TransformerEncoderLayer(nn.Module):
         self.ff_dropout = nn.Dropout(dropout)
 
     def forward(self, src_embeddings: torch.Tensor, e_mask: torch.Tensor | None = None) -> torch.Tensor:
+        """Process the source embeddings.
+
+        Args:
+            src_embeddings: the source embeddings of shape (bsz, seq_len, d_model).
+            e_mask: the mask to apply (default=None).
+
+        Returns:
+            a tensor which represents the layer's output whose shape is (bsz, seq_len, d_model).
+        """
         # Multi-head attention sub-layer
         mha_out = self.mha_norm(src_embeddings)
         mha_out = self.mha(mha_out, mha_out, mha_out, e_mask)
@@ -150,13 +188,18 @@ class TransformerEncoderLayer(nn.Module):
 
 
 class TransformerEncoder(nn.Module):
+    """The encoder from "Attention is all you need" (https://arxiv.org/pdf/1706.03762.pdf).
+
+    Differently from what is written in the paper, a LayerNorm layer at the end of the encoder layers stack.
+    """
+
     def __init__(self, e_layer: TransformerEncoderLayer, num_layers: int = 6, norm: nn.LayerNorm | None = None) -> None:
-        """
-        The encoder from "Attention is all you need" (https://arxiv.org/pdf/1706.03762.pdf). Following the actual
-        implementation of the paper, a LayerNorm layer is put at the end of the encoder layers stack.
-        :param e_layer: transformer's encoder layer that will be used in order to build the stack of encoder layers.
-        :param num_layers: the number of layers (default=6).
-        :param norm: the layer normalization that should be at the end of the encoder layers stack (default=None).
+        """Initializes a transformer encoder.
+
+        Args:
+            e_layer: transformer's encoder layer that will be used in order to build the stack of encoder layers.
+            num_layers: the number of layers (default=6).
+            norm: the layer normalization that should be at the end of the encoder layers stack (default=None).
         """
         super().__init__()
         self.num_layers = num_layers
@@ -164,6 +207,15 @@ class TransformerEncoder(nn.Module):
         self.norm = norm
 
     def forward(self, src_embeddings: torch.Tensor, e_mask: torch.Tensor = None) -> torch.Tensor:
+        """Process the source embeddings.
+
+        Args:
+            src_embeddings: the source embeddings of shape (bsz, seq_len, d_model).
+            e_mask: the mask to apply (default=None).
+
+        Returns:
+            a tensor which represents the encoder's output whose shape is (bsz, seq_len, d_model).
+        """
         e_out = src_embeddings
         for encoder_layer in self.layers:
             e_out = encoder_layer(e_out, e_mask)
@@ -175,6 +227,13 @@ class TransformerEncoder(nn.Module):
 
 
 class TransformerDecoderLayer(nn.Module):
+    """The transformer decoder layer from "Attention is all you need" (https://arxiv.org/pdf/1706.03762.pdf).
+
+    The layer is made up of two multi-head attention sub-layers (self-attention and encoder-decoder cross-attention)
+    followed by a feed-forward sub-layer. Differently from the paper, this implementation uses pre-norm inside the
+    residual connection.
+    """
+
     def __init__(
         self,
         d_model: int = 512,
@@ -186,20 +245,18 @@ class TransformerDecoderLayer(nn.Module):
         activation_ff: str = "relu",
         layer_norm_eps: float = 1e-6,
     ) -> None:
-        """
-        The transformer decoder layer from "Attention is all you need" (https://arxiv.org/pdf/1706.03762.pdf). The layer
-        is made up of two multi-head attention sub-layers (self-attention and encoder-decoder cross-attention) followed
-        by a feed-forward sub-layer. Differently from the paper, this implementation uses pre-norm inside the residual
-        connection.
-        :param d_model: the model's embedding dimension (default=512).
-        :param n_heads: the number of heads in the multi-attention mechanism (default=8).
-        :param dim_ff: dimension of the feedforward sub-layer (default=2048).
-        :param dropout: the dropout value used at the end of each sub-layer (default=0.1).
-        :param dropout_mha: the dropout value for the multi-head attention (default=0.0).
-        :param dropout_ff: the dropout value for the feed-forward sub-layer (default=0.0).
-        :param activation_ff: the activation function for the feed-forward sub-layer, can be either ReLU or GeLU
-            (default="relu").
-        :param layer_norm_eps: the eps value in the layer normalization (default=1e-6).
+        """Initializes a transformer decoder layer.
+
+        Args:
+            d_model: the model's embedding dimension (default=512).
+            n_heads: the number of heads in the multi-attention mechanism (default=8).
+            dim_ff: dimension of the feedforward sub-layer (default=2048).
+            dropout: the dropout value used at the end of each sub-layer (default=0.1).
+            dropout_mha: the dropout value for the multi-head attention (default=0.0).
+            dropout_ff: the dropout value for the feed-forward sub-layer (default=0.0).
+            activation_ff: the activation function for the feed-forward sub-layer, can be either ReLU or GeLU
+                (default="relu").
+            layer_norm_eps: the eps value in the layer normalization (default=1e-6).
         """
         super().__init__()
         # Multi-head attention sub-layer
@@ -224,6 +281,17 @@ class TransformerDecoderLayer(nn.Module):
         d_mask: torch.Tensor | None = None,
         e_mask: torch.Tensor | None = None,
     ) -> torch.Tensor:
+        """Process the target embeddings and the encoder output.
+
+        Args:
+            tgt_embeddings: the target embeddings of shape (bsz, seq_len, d_model).
+            e_output: the encoder output of shape (bsz, seq_len, d_model).
+            d_mask: the decoder mask (default=None).
+            e_mask: the encoder mask (default=None).
+
+        Returns:
+            a tensor which represents the layer's output whose shape is (bsz, seq_len, d_model).
+        """
         # Multi-head attention sub-layer
         mha_out = self.mha_norm(tgt_embeddings)
         mha_out = self.mha(mha_out, mha_out, mha_out, d_mask)
@@ -242,13 +310,18 @@ class TransformerDecoderLayer(nn.Module):
 
 
 class TransformerDecoder(nn.Module):
+    """The encoder from "Attention is all you need" (https://arxiv.org/pdf/1706.03762.pdf).
+
+    Differently from what is written in the paper, a LayerNorm layer at the end of the encoder layers stack.
+    """
+
     def __init__(self, d_layer: TransformerDecoderLayer, num_layers: int = 6, norm: nn.LayerNorm | None = None):
-        """
-        The decoder from "Attention is all you need" (https://arxiv.org/pdf/1706.03762.pdf). Following the actual
-        implementation of the paper, a LayerNorm layer is put at the end of the decoder layers stack.
-        :param d_layer: transformer's decoder layer that will be used in order to build the stack of decoder layers.
-        :param num_layers: the number of layers (default=6).
-        :param norm: the layer normalization that should be at the end of the decoder layers stack (default=None).
+        """Initializes a transformer decoder.
+
+        Args:
+            d_layer: transformer's decoder layer that will be used in order to build the stack of decoder layers.
+            num_layers: the number of layers (default=6).
+            norm: the layer normalization that should be at the end of the decoder layers stack (default=None).
         """
         super().__init__()
         self.num_layers = num_layers
@@ -258,13 +331,24 @@ class TransformerDecoder(nn.Module):
     def forward(
         self,
         tgt_embeddings: torch.Tensor,
-        e_out: torch.Tensor,
+        e_output: torch.Tensor,
         d_mask: torch.Tensor = None,
         e_mask: torch.Tensor = None,
     ) -> torch.Tensor:
+        """Process the target embeddings and the encoder output.
+
+        Args:
+            tgt_embeddings: the target embeddings of shape (bsz, seq_len, d_model).
+            e_output: the encoder output of shape (bsz, seq_len, d_model).
+            d_mask: the decoder mask (default=None).
+            e_mask: the encoder mask (default=None).
+
+        Returns:
+            a tensor which represents the decoder's output whose shape is (bsz, seq_len, d_model).
+        """
         d_out = tgt_embeddings
         for decoder_layer in self.layers:
-            d_out = decoder_layer(d_out, e_out, d_mask, e_mask)
+            d_out = decoder_layer(d_out, e_output, d_mask, e_mask)
 
         if self.norm is not None:
             d_out = self.norm(d_out)
