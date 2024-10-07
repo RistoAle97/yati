@@ -19,6 +19,8 @@ You can install the package by either:
   ```bash
   pip install git+https://github.com/RistoAle97/yati
   ```
+  This will not install the `dev` dependencies listed in `pyproject.toml`.
+
 - _cloning the repository and installing the dependencies_
   ```bash
   git clone https://github.com/RistoAle97/yati
