@@ -14,15 +14,18 @@
 ---
 
 ## :package: Installation
-First, clone the repo.
-```bash
-git clone https://github.com/RistoAle97/yati
-```
-Then, install the dependencies.
-```bash
-pip install -e yati
-pip install yati[dev]  # if you want to contribute
-```
+You can install the package by either:
+- _using pip_
+  ```bash
+  pip install git+https://github.com/RistoAle97/yati
+  ```
+- _cloning the repository and installing the dependencies_
+  ```bash
+  git clone https://github.com/RistoAle97/yati
+  
+  pip install -e yati
+  pip install yati[dev]  # if you want to contribute to this project
+  ```
 ---
 
 ## :hammer_and_wrench: Implementation details
