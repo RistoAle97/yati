@@ -4,11 +4,11 @@ import torch
 from torch import nn
 from torch.functional import F
 
-from src import yati as inference
-from src.yati.config import TransformerConfig
-from src.yati.layers import TransformerDecoder, TransformerDecoderLayer, TransformerEncoder, TransformerEncoderLayer
-from src.yati.positional_encoding import PositionalEncoding
-from src.yati.utils import init_bert_weights
+from . import generation as inference
+from .config import TransformerConfig
+from .layers import TransformerDecoder, TransformerDecoderLayer, TransformerEncoder, TransformerEncoderLayer
+from .positional_encoding import PositionalEncoding
+from .utils import init_bert_weights
 
 
 class Transformer(nn.Module):

@@ -2,8 +2,8 @@
 
 import matplotlib.pyplot as plt
 
-from src.yati.transformer import Transformer
-from src.yati.utils import model_n_parameters
+from .transformer import Transformer
+from .utils import model_n_parameters
 
 
 def _numerize(n: int, ndigits: int = 2) -> str:

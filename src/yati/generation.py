@@ -3,8 +3,8 @@
 import torch
 from torch.functional import F
 
-from src.yati.masks import create_decoder_mask, create_encoder_mask
-from src.yati.transformer import Transformer
+from .masks import create_decoder_mask, create_encoder_mask
+from .transformer import Transformer
 
 
 def greedy_decoding(
