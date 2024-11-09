@@ -24,7 +24,7 @@ You can install the package by either:
 - _cloning the repository and installing the dependencies_
   ```bash
   git clone https://github.com/RistoAle97/yati
-  
+
   pip install -e yati
   pip install yati[dev]  # if you want to contribute to this project
   ```
