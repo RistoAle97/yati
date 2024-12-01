@@ -18,9 +18,18 @@ from .utils import init_bert_weights, model_n_parameters, model_size
 
 
 __all__ = [
-    "SMALL_CONFIG",
     "BASE_CONFIG",
     "LARGE_CONFIG",
+    "SMALL_CONFIG",
+    "FeedForward",
+    "MultiHeadAttention",
+    "PositionalEncoding",
+    "Transformer",
+    "TransformerConfig",
+    "TransformerDecoder",
+    "TransformerDecoderLayer",
+    "TransformerEncoder",
+    "TransformerEncoderLayer",
     "beam_decoding",
     "create_decoder_mask",
     "create_encoder_mask",
@@ -31,13 +40,4 @@ __all__ = [
     "model_n_parameters",
     "model_size",
     "plot_model_parameters",
-    "FeedForward",
-    "MultiHeadAttention",
-    "PositionalEncoding",
-    "Transformer",
-    "TransformerConfig",
-    "TransformerDecoder",
-    "TransformerEncoder",
-    "TransformerDecoderLayer",
-    "TransformerEncoderLayer",
 ]
