@@ -5,13 +5,10 @@
 [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)]()
 [![Pytorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)](https://github.com/pytorch/pytorch)
 
-
 </div>
 
 >[!WARNING]
 > This repository was developed for academic and personal purposes in order to better understand the underlying architecture of the Transformer and to use it for future small projects.
-
----
 
 ## :package: Installation
 You can install the package by either:
@@ -28,7 +25,6 @@ You can install the package by either:
   pip install -e yati
   pip install yati[dev]  # if you want to contribute to this project
   ```
----
 
 ## :hammer_and_wrench: Implementation details
 >[!NOTE]
@@ -43,8 +39,6 @@ Hereafter a comparison between the original transformer and the one from this re
 Original             | This repository
 :-------------------------:|:-------------------------:
 <img src="https://github.com/RistoAle97/yati/blob/main/assets/transformer_original.jpg" width=80%> | <img src="https://github.com/RistoAle97/yati/blob/main/assets/model_architecture.jpg" width=78%/>
-
----
 
 ## :books: Bibliography
 [1] Vaswani, Ashish, et al. ["Attention is all you need."](https://arxiv.org/abs/1706.03762). Advances in neural information processing systems 30 (2017).
